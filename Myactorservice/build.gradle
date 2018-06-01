@@ -1,0 +1,73 @@
+apply plugin: 'java'
+apply plugin: 'eclipse'
+
+sourceSets {
+  main {
+     java.srcDirs = ['src']
+     output.classesDir = 'out/classes'
+      resources {
+       srcDirs = ['src']
+     }
+   }
+}
+
+clean.doFirst {
+    delete "${projectDir}/lib"
+    delete "${projectDir}/out"
+    delete "${projectDir}/../FabricServiceJava/MyactorservicePkg/Code/lib"
+    delete "${projectDir}/../FabricServiceJava/MyactorservicePkg/Code/myactorservice.jar"
+}
+
+repositories {
+    mavenCentral()
+}
+
+configurations {
+    azuresf
+}
+
+dependencies {
+    compile project(':MyactorserviceInterface')
+    azuresf ('com.microsoft.servicefabric:sf-actors:1.0.0-preview2')
+    compile fileTree(dir: 'lib', include: '*.jar')
+}
+
+task explodeDeps(type: Copy, dependsOn:configurations.azuresf) { task ->
+    configurations.azuresf.filter { it.toString().contains("native") }.each{
+        from zipTree(it)
+    }
+    configurations.azuresf.filter { !it.toString().contains("native") }.each {
+        from it
+    }
+    into "lib"
+    include "lib*.so", "*.jar"
+}
+
+compileJava.dependsOn(explodeDeps)
+
+jar {
+    manifest {
+        def mpath = configurations.compile.collect {'lib/'+it.getName()}.join (' ')
+        mpath = mpath + ' ' + configurations.azuresf.collect {'lib/'+it.getName()}.join (' ')
+    attributes(
+                'Main-Class': 'reliableactor.MyactorserviceActorHost',
+                "Class-Path": mpath)
+    baseName "myactorservice"
+    destinationDir = file('../FabricServiceJava/MyactorservicePkg/Code')}
+ }
+
+ task copyDeps<< {
+	copy {
+		from("lib/")
+		into("../FabricServiceJava/MyactorservicePkg/Code/lib")
+		include('*')
+	}
+	copy {
+		from("../MyactorserviceInterface/out/lib")
+		into("../FabricServiceJava/MyactorservicePkg/Code/lib")
+		include('*.jar')
+	}
+}
+
+
+defaultTasks 'clean', 'jar', 'copyDeps'

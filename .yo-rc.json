@@ -1,0 +1,15 @@
+{
+  "generator-azuresfcontainer": {
+    "projName": "FabricClusterSampleApp"
+  },
+  "generator-azuresfcsharp": {
+    "projName": "FabricClusterCsharpApp",
+    "frameworkType": "Reliable Actor Service",
+    "author": "<your name>"
+  },
+  "generator-azuresfjava": {
+    "projName": "FabricServiceJava",
+    "frameworkType": "Reliable Actor Service",
+    "author": "<your name>"
+  }
+}

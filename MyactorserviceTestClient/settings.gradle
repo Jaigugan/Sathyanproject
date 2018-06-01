@@ -1,0 +1,3 @@
+include ':MyactorserviceInterface'
+
+project(':MyactorserviceInterface').projectDir = new File(settingsDir, '../MyactorserviceInterface')
